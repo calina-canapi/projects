@@ -1,0 +1,60 @@
+--USING 2 SETS OF FILES (ARTIST INFO AND VIDEO INFO), I IDENTIFIED THE HIGHEST SELLING CURRENT KPOP ARTIST ALONG WITH MOST AWARDED KPOP ARTISTS. I THEN EXPLORED THE TOTAL WINS AND SALES PER GENDER --  
+--------------------
+"Sales Per Artist"
+
+-- This query breaks down Sales per Artist/Group using CTE --
+
+WITH Sales_per_artist AS
+(SELECT Artist_info.korean_artists_id, sales,Artist_info.name
+FROM [Kpop].[dbo].[Artist info] AS Artist_info
+INNER JOIN [Kpop].[dbo].[Video info] AS Video_info
+ON Artist_info.korean_artists_id = Video_info.korean_artists_id
+)
+
+SELECT sales,name
+FROM Sales_per_artist
+GROUP BY sales, name
+ORDER BY sales DESC;
+--------------------
+
+"Awards Per Artist" 
+
+-- This query breaks down Award show wins per Artist/Group using CTE --
+
+WITH Awards_won AS
+(SELECT Artist_info.korean_artists_id, music_show_awards,yearly_awards,Artist_info.name
+FROM [Kpop].[dbo].[Artist info] AS Artist_info
+INNER JOIN [Kpop].[dbo].[Video info] AS Video_info
+ON Artist_info.korean_artists_id = Video_info.korean_artists_id)
+
+SELECT name, (SUM(music_show_awards) + SUM(yearly_awards)) AS Wins
+FROM Awards_won
+GROUP BY name
+ORDER BY Wins DESC;
+--------------------
+
+"Totals Per Gender"
+
+-- This query identifies the Total Sales and Wins per gender. It also includes the pecentage per gender in each category using Window Functions --
+
+SELECT Artist_info.gender AS Gender,
+
+-- Calculate Total Wins --
+(SUM(music_show_awards) + SUM(yearly_awards)) AS TotalWins,
+
+--Calculate Total Sales --
+		SUM(CAST(Artist_info.sales AS BIGINT)) AS TotalSales,
+
+-- % of Total Win--
+100 * (SUM(music_show_awards) + SUM(yearly_awards))/SUM((SUM(music_show_awards) + SUM(yearly_awards))) OVER () AS PctWins,
+
+-- % of Total Sales--
+100.0 * SUM(CAST(Artist_info.sales AS BIGINT))/SUM(SUM(CAST(Artist_info.sales AS BIGINT))) OVER () AS PctSales
+
+FROM [Kpop].[dbo].[Artist info] AS Artist_info
+INNER JOIN [Kpop].[dbo].[Video info] AS Video_info
+ON Artist_info.korean_artists_id = Video_info.korean_artists_id
+WHERE Gender IN ('Male','Female')
+GROUP BY Gender;
+--------------------
+END
