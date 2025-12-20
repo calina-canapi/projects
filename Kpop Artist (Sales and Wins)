@@ -56,5 +56,30 @@ INNER JOIN [Kpop].[dbo].[Video info] AS Video_info
 ON Artist_info.korean_artists_id = Video_info.korean_artists_id
 WHERE Gender IN ('Male','Female')
 GROUP BY Gender;
+
+"Determining Active Groups"
+
+-- This query determines information on active/disbanded groups --
+
+WITH Artists_table AS (
+	SELECT Artist_info.korean_artists_id, sales,Artist_info.name, Artist_info.gender, Artist_info.solo_or_group, Artist_info.disband_date
+	FROM [Kpop].[dbo].[Artist info] AS Artist_info
+	INNER JOIN [Kpop].[dbo].[Video info] AS Video_info
+	ON Artist_info.korean_artists_id = Video_info.korean_artists_id
+	 )
+
+
+SELECT name, korean_artists_id,disband_date,
+
+--  Creating a case to determine if groups are still active or inactive -- 
+CASE
+	WHEN disband_date IS NULL THEN 'Active'
+	ELSE 'Disbanded'
+	END AS Active_Status
+
+FROM Artists_table
+ORDER BY disband_date ASC;
+
+
 --------------------
 END
