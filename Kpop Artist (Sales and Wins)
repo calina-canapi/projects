@@ -79,7 +79,37 @@ CASE
 
 FROM Artists_table
 ORDER BY disband_date ASC;
-
-
 --------------------
-END
+
+"Debuts Per Generation"
+
+--- Identifies how many artists debuted under which Kpop Generation ---
+
+SELECT 
+    Generation,
+    COUNT(*) AS Debuted_Artists_Count
+FROM (
+    SELECT 
+        CASE
+            WHEN debut_date BETWEEN '1992-04-11' AND '2003-12-25' THEN 'First Gen'
+            WHEN debut_date BETWEEN '2003-12-26' AND '2012-04-07' THEN 'Second Gen'
+            WHEN debut_date BETWEEN '2012-04-08' AND '2017-12-30' THEN 'Third Gen'
+            WHEN debut_date BETWEEN '2017-12-31' AND '2023-01-07' THEN 'Fourth Gen'
+            WHEN debut_date >= '2023-01-08' THEN 'Fifth Gen'
+            ELSE 'Unknown'
+        END AS Generation
+    FROM [Kpop].[dbo].[Artist info]
+    
+) g
+GROUP BY Generation
+ORDER BY 
+    CASE Generation
+        WHEN 'First Gen' THEN 1
+        WHEN 'Second Gen' THEN 2
+        WHEN 'Third Gen' THEN 3
+        WHEN 'Fourth Gen' THEN 4
+        WHEN 'Fifth Gen' THEN 5
+        ELSE 6
+    END;
+--------------------
+
